@@ -1,0 +1,48 @@
+# Only for Pi-Hole releases >= 6
+version: "3.7"
+
+services:
+  pihole:
+    container_name: pihole-demo-1
+    image: pihole/pihole:latest
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - 67:67/udp       # Only needed for DHCP
+      - 8081:80         # Webinterface
+    environment:
+      DNSMASQ_USER: root
+      TZ: Europe/Berlin
+      FTLCONF_webserver_api_password: DEIN PASSWORD
+      DNS1: unbound#53
+      DNS2: unbound#53
+    volumes:
+      - /volume2/docker/pilohe/etc:/etc/pihole
+      - /volume2/docker/pilohe/dnsmasq:/etc/dnsmasq.d
+    depends_on:
+      - unbound
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN       # Required if using DHCP
+      - CAP_SYS_TIME    # Required on Synology/Ugreen
+    networks:
+      - pihole_net
+
+  unbound:
+    container_name: unbound
+    image: mvance/unbound:latest
+    ports:
+      - "5335:53/tcp"
+      - "5335:53/udp"
+    restart: unless-stopped
+    networks:
+      - pihole_net
+
+networks:
+  pihole_net:
+    enable_ipv6: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "fd00:dead:beef::/64"
