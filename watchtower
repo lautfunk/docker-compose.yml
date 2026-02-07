@@ -1,3 +1,7 @@
+# 🔄 Watchtower - Automatisches Docker Update
+# Aktualisiert laufende Container automatisch, wenn neue Versionen verfügbar sind.
+# Prüft alle 7 Tage (604800 Sekunden).
+
 version: '3.9'
 
 services:
@@ -6,5 +10,7 @@ services:
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    # --cleanup: löscht alte Images nach Update
+    # --interval: Zeit in Sekunden zwischen Checks
     command: --cleanup --interval 604800
     restart: unless-stopped

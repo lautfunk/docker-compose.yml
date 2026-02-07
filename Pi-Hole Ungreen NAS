@@ -1,3 +1,7 @@
+# 🛡 Pi-Hole + Unbound (Adblocker für Ugreen NAS)
+# Kombiniert Pi-Hole (Werbeblocker) mit Unbound (eigener DNS-Resolver).
+# WICHTIG: Ersetze 'DEIN PASSWORD' bei FTLCONF_webserver_api_password!
+
 # Only for Pi-Hole releases >= 6
 version: "3.7"
 
@@ -8,8 +12,8 @@ services:
     ports:
       - 53:53/tcp
       - 53:53/udp
-      - 67:67/udp       # Only needed for DHCP
-      - 8081:80         # Webinterface
+      - 67:67/udp       # Nur für DHCP nötig
+      - 8081:80         # Webinterface erreichbar unter http://NAS-IP:8081
     environment:
       DNSMASQ_USER: root
       TZ: Europe/Berlin
@@ -17,14 +21,15 @@ services:
       DNS1: unbound#53
       DNS2: unbound#53
     volumes:
+      # Pfade auf dem NAS (ggf. anpassen)
       - /volume2/docker/pilohe/etc:/etc/pihole
       - /volume2/docker/pilohe/dnsmasq:/etc/dnsmasq.d
     depends_on:
       - unbound
     restart: unless-stopped
     cap_add:
-      - NET_ADMIN       # Required if using DHCP
-      - CAP_SYS_TIME    # Required on Synology/Ugreen
+      - NET_ADMIN       # Nötig für DHCP
+      - CAP_SYS_TIME    # Nötig auf Synology/Ugreen für Zeit-Sync
     networks:
       - pihole_net
 
