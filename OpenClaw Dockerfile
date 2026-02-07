@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  openclaw:
+    build:
+      context: .
+      dockerfile: Dockerfile   # <- explizit das aktuelle OpenClaw Dockerfile
+      # optional: wenn du Systemtools "sauber" ins Image backen willst:
+      # args:
+      #   OPENCLAW_DOCKER_APT_PACKAGES: "git openssh-client ca-certificates"
+
+    container_name: openclaw
+    restart: unless-stopped
+
+    ports:
+      - "18789:18789"
+
+    devices:
+      - /dev/dri:/dev/dri
+
+    volumes:
+      - /volume2/docker/Openclaw/data:/home/node/.openclaw
+      - /volume2/docker/Openclaw/node-local:/home/node/.local   # <- gemini-cli bleibt nach Neustart
+      - /volume2/docker/Openclaw/node-ssh:/home/node/.ssh       # <- GitHub SSH keys bleiben nach Neustart
+
+    environment:
+      - PATH=/home/node/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - NPM_CONFIG_PREFIX=/home/node/.local
+
+    env_file:
+      - ./openclaw.env
+
+    command: ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789"]
