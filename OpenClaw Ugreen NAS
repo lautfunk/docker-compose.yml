@@ -1,0 +1,33 @@
+# OpenClaw (build from OpenClaw repo!)
+# NOTE: This compose expects to be run from the OpenClaw repo root if you keep build: .
+# If you run it elsewhere, change build.context to your OpenClaw repo path.
+
+version: "3.8"
+
+services:
+  openclaw:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openclaw
+    restart: unless-stopped
+
+    ports:
+      - "18789:18789"  # LAN only
+
+    devices:
+      - /dev/dri:/dev/dri  # Intel iGPU passthrough
+
+    volumes:
+      - /volume2/docker/Openclaw/data:/home/node/.openclaw
+      - /volume2/docker/Openclaw/node-local:/home/node/.local   # keeps gemini-cli
+      - /volume2/docker/Openclaw/node-ssh:/home/node/.ssh       # keeps github ssh keys
+
+    environment:
+      - PATH=/home/node/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - NPM_CONFIG_PREFIX=/home/node/.local
+
+    env_file:
+      - ./openclaw.env
+
+    command: ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789"]
